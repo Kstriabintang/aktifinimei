@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEMBAKIMEI Admin Panel</title>
+  <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/deadlyclown/1MEI@main/IMEI.png">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            sora: ['Sora', 'sans-serif'],
+          },
+          colors: {
+            primary: '#8B5CF6',
+            glow: '#A855F7',
+            success: '#22C55E',
+            warning: '#F59E0B',
+            danger: '#EF4444',
+            bgDark: '#07010F',
+            cardSurface: '#12071F',
+            textPrimary: '#F5F3FF',
+            textSecondary: 'rgba(245, 243, 255, 0.68)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    /* ===== ROOT & RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #07010F;
+      color: #F5F3FF;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .font-sora { font-family: 'Sora', sans-serif; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+
+    /* ===== GLASSMORPHISM ===== */
+    .glass {
+      background: rgba(18, 7, 31, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .glass-strong {
+      background: rgba(18, 7, 31, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+    }
+    .navbar-glass {
+      background: rgba(10, 10, 20, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .footer-glass {
+      background: rgba(10, 10, 20, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* ===== INPUT FIELD ===== */
+    .input-field {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      padding-left: 2.75rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-family: 'Inter', sans-serif;
+      color: #F5F3FF;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.2s ease;
+    }
+    .input-field::placeholder { color: rgba(245, 243, 255, 0.32); }
+    .input-field:focus {
+      outline: none;
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    /* ===== BUTTON PREMIUM ===== */
+    .btn-premium {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      color: #F5F3FF;
+      background: linear-gradient(135deg, #7C3AED, #A855F7);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .btn-premium::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .btn-premium:hover::before { opacity: 1; }
+    .btn-premium:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 32px rgba(139, 92, 246, 0.35);
+    }
+    .btn-premium:active { transform: translateY(0); }
+
+    /* ===== CARD HOVER ===== */
+    .card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      border-color: rgba(139, 92, 246, 0.2);
+      box-shadow: 0 8px 32px rgba(139, 92, 246, 0.08);
+    }
+
+    /* ===== STATUS BADGES ===== */
+    .badge-pending {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      background: rgba(245, 158, 11, 0.12);
+      color: #F59E0B;
+      border: 1px solid rgba(245, 158, 11, 0.18);
+    }
+    .badge-paid {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      background: rgba(59, 130, 246, 0.12);
+      color: #3B82F6;
+      border: 1px solid rgba(59, 130, 246, 0.18);
+    }
+    .badge-processing {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      background: rgba(139, 92, 246, 0.12);
+      color: #8B5CF6;
+      border: 1px solid rgba(139, 92, 246, 0.18);
+    }
+    .badge-completed {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      background: rgba(34, 197, 94, 0.12);
+      color: #22C55E;
+      border: 1px solid rgba(34, 197, 94, 0.18);
+    }
+    .badge-failed {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      background: rgba(239, 68, 68, 0.12);
+      color: #EF4444;
+      border: 1px solid rgba(239, 68, 68, 0.18);
+    }
+
+    /* ===== SPINNER ===== */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(139, 92, 246, 0.2);
+      border-top-color: #8B5CF6;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== TOAST ===== */
+    .toast-in {
+      animation: toastSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes toastSlideIn {
+      from { opacity: 0; transform: translateX(100px) scale(0.9); }
+      to { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    .toast-out {
+      animation: toastSlideOut 0.3s ease forwards;
+    }
+    @keyframes toastSlideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(100px); }
+    }
+    .toast-premium {
+      background: rgba(18, 7, 31, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 3px solid #8B5CF6;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ===== TABLE ===== */
+    .glass-table { width: 100%; border-collapse: collapse; }
+    .glass-table th {
+      background: rgba(139, 92, 246, 0.06);
+      color: rgba(245, 243, 255, 0.5);
+      font-weight: 600;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.875rem 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      white-space: nowrap;
+    }
+    .glass-table td {
+      padding: 0.875rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.8125rem;
+      color: #F5F3FF;
+      vertical-align: middle;
+    }
+    .glass-table tbody tr { transition: background 0.2s ease; }
+    .glass-table tbody tr:hover { background: rgba(139, 92, 246, 0.04); }
+
+    /* ===== ACTION BUTTONS ===== */
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(245, 243, 255, 0.8);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(139, 92, 246, 0.3);
+      color: #F5F3FF;
+      transform: translateY(-1px);
+    }
+    .action-btn:active { transform: translateY(0); }
+    .action-btn .spinner { width: 12px; height: 12px; border-width: 1.5px; display: none; }
+    .action-btn.loading .spinner { display: inline-block; }
+    .action-btn.loading .btn-text { display: none; }
+
+    /* ===== PULSE DOT ===== */
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22C55E;
+      animation: pulse 2s ease infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.15); }
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.5); }
+
+    /* ===== PAGE TRANSITIONS ===== */
+    #login-page { transition: opacity 0.3s ease, visibility 0.3s ease; }
+    #login-page.hidden-page { opacity: 0; visibility: hidden; pointer-events: none; }
+    #dashboard-page { transition: opacity 0.3s ease; }
+    #dashboard-page.hidden-page { opacity: 0; visibility: hidden; pointer-events: none; position: absolute; top: 0; left: 0; width: 100%; }
+
+    /* ===== STAT NUMBER ===== */
+    .stat-number { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="min-h-screen font-inter" style="background: #07010F;">
+
+  <!-- ============================ -->
+  <!-- LOGIN SCREEN                 -->
+  <!-- ============================ -->
+  <div id="login-page" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background: #07010F;">
+    <!-- Ambient glow behind card -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-[28rem] rounded-full opacity-[0.07] pointer-events-none" style="background: radial-gradient(circle, #A855F7 0%, transparent 70%);"></div>
+    <div class="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full opacity-[0.04] pointer-events-none" style="background: radial-gradient(circle, #8B5CF6 0%, transparent 70%);"></div>
+
+    <!-- Login Card -->
+    <div class="glass-strong w-full max-w-md p-10 rounded-2xl relative z-10">
+      <!-- Logo -->
+      <div class="text-center mb-8">
+        <img src="https://cdn.jsdelivr.net/gh/deadlyclown/1MEI@main/IMEI.png" alt="TEMBAKIMEI" class="h-14 w-auto mx-auto mb-4 rounded-xl" style="filter: drop-shadow(0 0 12px rgba(139,92,246,0.4));">
+        <h1 class="font-sora text-2xl font-bold tracking-tight" style="color: #F5F3FF;">TEMBAKIMEI</h1>
+        <p class="text-xs font-medium mt-1.5 tracking-wide" style="color: rgba(245, 243, 255, 0.5);">Admin</p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="adminLoginForm" class="space-y-5" onsubmit="return false;">
+        <div>
+          <label class="block text-xs font-semibold mb-2" style="color: rgba(245, 243, 255, 0.5);">Password Admin</label>
+          <div class="relative">
+            <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-xs" style="color: rgba(245, 243, 255, 0.32);"></i>
+            <input
+              type="password"
+              id="login-password"
+              placeholder="Masukkan password admin"
+              class="input-field pr-10"
+              autocomplete="off"
+            >
+            <button
+              type="button"
+              id="toggle-password"
+              class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs transition-colors"
+              style="color: rgba(245, 243, 255, 0.32);"
+              onclick="TembakImeiAdmin.togglePasswordVisibility()"
+            >
+              <i class="fas fa-eye" id="toggle-password-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="login-error" class="hidden">
+          <div class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-medium" style="background: rgba(239, 68, 68, 0.1); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.2);">
+            <i class="fas fa-circle-exclamation"></i>
+            <span id="login-error-text">Password salah</span>
+          </div>
+        </div>
+
+        <!-- Login Button -->
+        <button
+          type="submit"
+          id="login-btn"
+          class="btn-premium w-full"
+          onclick="TembakImeiAdmin.handleLoginFromForm()"
+        >
+          <span class="spinner hidden" id="login-spinner"></span>
+          <i class="fas fa-arrow-right-to-bracket" id="login-icon"></i>
+          <span id="login-btn-text">Login</span>
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <div class="mt-8 text-center">
+        <p class="text-xs" style="color: rgba(245, 243, 255, 0.32);">TEMBAKIMEI &copy; 2026</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ -->
+  <!-- DASHBOARD                    -->
+  <!-- ============================ -->
+  <div id="dashboard-page" class="hidden-page min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="navbar-glass sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-14">
+          <!-- Left: Logo -->
+          <div class="flex items-center gap-3">
+            <img src="https://cdn.jsdelivr.net/gh/deadlyclown/1MEI@main/IMEI.png" alt="TEMBAKIMEI" class="h-7 w-auto rounded-lg" style="filter: drop-shadow(0 0 8px rgba(139,92,246,0.4));">
+            <span class="flex items-center gap-2">
+              <span class="font-sora text-sm font-bold tracking-tight" style="color: #F5F3FF;">TEMBAKIMEI</span>
+              <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-semibold" style="background: rgba(139, 92, 246, 0.15); color: #A78BFA;">Admin</span>
+            </span>
+          </div>
+
+          <!-- Right: Logout -->
+          <button
+            id="logoutBtn"
+            onclick="TembakImeiAdmin.handleLogout()"
+            class="flex items-center gap-2 text-xs font-medium transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5"
+            style="color: rgba(245, 243, 255, 0.5);"
+          >
+            <i class="fas fa-right-from-bracket"></i>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <!-- Total Orders -->
+        <div class="glass rounded-xl p-5 card-hover relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-20 h-20 rounded-full opacity-[0.06] -translate-y-8 translate-x-8" style="background: radial-gradient(circle, #8B5CF6, transparent);"></div>
+          <div class="flex items-center justify-center w-10 h-10 rounded-lg mb-3" style="background: rgba(139, 92, 246, 0.1);">
+            <i class="fas fa-clipboard-list" style="color: #A78BFA;"></i>
+          </div>
+          <p class="text-sm" style="color: rgba(245, 243, 255, 0.5);">Total Order</p>
+          <p class="text-3xl font-bold font-sora mt-1 stat-number" id="stat-total" data-target="0" style="color: #F5F3FF;">0</p>
+        </div>
+
+        <!-- Pending -->
+        <div class="glass rounded-xl p-5 card-hover relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-20 h-20 rounded-full opacity-[0.06] -translate-y-8 translate-x-8" style="background: radial-gradient(circle, #F59E0B, transparent);"></div>
+          <div class="flex items-center justify-center w-10 h-10 rounded-lg mb-3" style="background: rgba(245, 158, 11, 0.1);">
+            <i class="fas fa-clock" style="color: #FBBF24;"></i>
+          </div>
+          <p class="text-sm" style="color: rgba(245, 243, 255, 0.5);">Pending</p>
+          <p class="text-3xl font-bold font-sora mt-1 stat-number" id="stat-pending" data-target="0" style="color: #F5F3FF;">0</p>
+        </div>
+
+        <!-- Processing -->
+        <div class="glass rounded-xl p-5 card-hover relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-20 h-20 rounded-full opacity-[0.06] -translate-y-8 translate-x-8" style="background: radial-gradient(circle, #8B5CF6, transparent);"></div>
+          <div class="flex items-center justify-center w-10 h-10 rounded-lg mb-3" style="background: rgba(139, 92, 246, 0.1);">
+            <i class="fas fa-spinner" style="color: #A78BFA;"></i>
+          </div>
+          <p class="text-sm" style="color: rgba(245, 243, 255, 0.5);">Processing</p>
+          <p class="text-3xl font-bold font-sora mt-1 stat-number" id="stat-processing" data-target="0" style="color: #F5F3FF;">0</p>
+        </div>
+
+        <!-- Completed -->
+        <div class="glass rounded-xl p-5 card-hover relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-20 h-20 rounded-full opacity-[0.06] -translate-y-8 translate-x-8" style="background: radial-gradient(circle, #22C55E, transparent);"></div>
+          <div class="flex items-center justify-center w-10 h-10 rounded-lg mb-3" style="background: rgba(34, 197, 94, 0.1);">
+            <i class="fas fa-check-circle" style="color: #34D399;"></i>
+          </div>
+          <p class="text-sm" style="color: rgba(245, 243, 255, 0.5);">Completed</p>
+          <p class="text-3xl font-bold font-sora mt-1 stat-number" id="stat-completed" data-target="0" style="color: #F5F3FF;">0</p>
+        </div>
+      </div>
+
+      <!-- Orders Section -->
+      <div class="mb-6">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <div class="flex items-center gap-3">
+            <h2 class="font-sora text-xl font-semibold" style="color: #F5F3FF;">Daftar Order</h2>
+            <!-- Live Indicator -->
+            <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style="background: rgba(34, 197, 94, 0.08);">
+              <div class="pulse-dot"></div>
+              <span class="text-[0.6875rem] font-medium" style="color: #34D399;">Live</span>
+            </div>
+          </div>
+
+          <!-- Search -->
+          <div class="relative w-full sm:w-80">
+            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs" style="color: rgba(245, 243, 255, 0.32);"></i>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Cari IMEI atau WhatsApp..."
+              class="input-field pl-9"
+              oninput="TembakImeiAdmin.handleSearch(this.value)"
+            >
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="glass rounded-xl overflow-hidden">
+          <!-- Loading State -->
+          <div id="table-loading" class="hidden py-16 flex items-center justify-center flex-col">
+            <div class="spinner mb-3"></div>
+            <p class="text-xs" style="color: rgba(245, 243, 255, 0.32);">Memuat data order...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div id="table-empty" class="hidden py-16 flex items-center justify-center flex-col">
+            <div class="flex items-center justify-center w-16 h-16 rounded-full mb-4" style="background: rgba(255, 255, 255, 0.03);">
+              <i class="fas fa-inbox text-2xl" style="color: rgba(245, 243, 255, 0.2);"></i>
+            </div>
+            <p class="text-sm font-medium mb-1" style="color: rgba(245, 243, 255, 0.5);">Belum ada order</p>
+            <p class="text-xs" style="color: rgba(245, 243, 255, 0.32);">Order baru akan muncul di sini</p>
+          </div>
+
+          <!-- Table -->
+          <div class="overflow-x-auto" id="table-container">
+            <table class="glass-table">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>IMEI</th>
+                  <th class="hidden sm:table-cell">Device</th>
+                  <th>WhatsApp</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody">
+                <!-- Rows rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Bottom Info -->
+        <div class="flex items-center justify-between mt-3 px-1">
+          <p class="text-xs" style="color: rgba(245, 243, 255, 0.32);">
+            Auto-refresh setiap <span style="color: #A78BFA;">30 detik</span>
+          </p>
+          <p class="text-xs" style="color: rgba(245, 243, 255, 0.32);" id="last-updated">
+            Terakhir diperbarui: -
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-glass mt-auto">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between">
+          <p class="text-xs" style="color: rgba(245, 243, 255, 0.32);">TEMBAKIMEI &copy; 2026</p>
+          <p class="text-xs" style="color: rgba(245, 243, 255, 0.32);">Admin Panel v1.0</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ============================ -->
+  <!-- TOAST CONTAINER              -->
+  <!-- ============================ -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-3 pointer-events-none"></div>
+
+  <!-- ============================ -->
+  <!-- SCRIPTS                      -->
+  <!-- ============================ -->
+  <script src=".env.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/pakasir.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

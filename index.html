@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEMBAKIMEI — Unlock IMEI Resmi 3 Bulan</title>
+  <meta name="description" content="Unlock IMEI resmi dengan proses cepat 1x24 jam. Payment otomatis, notifikasi real-time.">
+  <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/deadlyclown/1MEI@main/IMEI.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#07010F',
+            surface: '#12071F',
+            violet: { 500: '#8B5CF6', 600: '#7C3AED' },
+            purple: { 400: '#A855F7' },
+            indigo: { 500: '#6366F1' },
+          },
+          fontFamily: {
+            sora: ['Sora', 'sans-serif'],
+            inter: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* ---- Critical Above-Fold Styles ---- */
+    body {
+      background: #07010F;
+      font-family: 'Inter', sans-serif;
+      color: #F5F3FF;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .font-sora { font-family: 'Sora', sans-serif; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+
+    /* Ambient Glow Background */
+    .ambient-glow {
+      position: absolute;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 500px;
+      background: radial-gradient(ellipse at center, rgba(139,92,246,0.22) 0%, rgba(168,85,247,0.1) 40%, transparent 70%);
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 300px;
+      height: 300px;
+      background: rgba(139,92,246,0.12);
+      top: 10%;
+      left: 10%;
+      animation: orbFloat1 20s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 250px;
+      height: 250px;
+      background: rgba(168,85,247,0.08);
+      top: 20%;
+      right: 10%;
+      animation: orbFloat2 25s ease-in-out infinite;
+    }
+    .orb-3 {
+      width: 200px;
+      height: 200px;
+      background: rgba(99,102,241,0.08);
+      bottom: 20%;
+      left: 30%;
+      animation: orbFloat3 18s ease-in-out infinite;
+    }
+
+    /* Premium Button */
+    .btn-premium {
+      background: linear-gradient(135deg, #7C3AED, #A855F7);
+      box-shadow: 0 0 30px rgba(168,85,247,0.35), 0 0 80px rgba(139,92,246,0.15);
+      transition: all 0.25s ease;
+    }
+    .btn-premium:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(168,85,247,0.5), 0 0 100px rgba(139,92,246,0.25);
+    }
+
+    /* Pulse subtle */
+    .pulse-subtle {
+      animation: pulseSubtle 3s ease-in-out infinite;
+    }
+    @keyframes pulseSubtle {
+      0%, 100% { box-shadow: 0 0 30px rgba(168,85,247,0.35), 0 0 80px rgba(139,92,246,0.15); }
+      50% { box-shadow: 0 0 40px rgba(168,85,247,0.5), 0 0 100px rgba(139,92,246,0.25); }
+    }
+
+    /* Headings */
+    .heading-section {
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: #F5F3FF;
+    }
+    .heading-card {
+      font-size: 20px;
+      font-weight: 600;
+      color: #F5F3FF;
+    }
+
+    /* Body text */
+    .body-text {
+      color: rgba(245,243,255,0.68);
+      line-height: 1.7;
+    }
+
+    /* Glass card */
+    .glass {
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+    }
+
+    /* Input fields */
+    .input-field {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      color: #F5F3FF;
+      font-size: 15px;
+      transition: all 0.25s ease;
+      outline: none;
+    }
+    .input-field::placeholder {
+      color: rgba(245,243,255,0.35);
+    }
+    .input-field:focus {
+      border-color: rgba(139,92,246,0.5);
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+    }
+
+    /* Outline button */
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(139,92,246,0.5);
+      color: #A855F7;
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .btn-outline:hover {
+      background: rgba(139,92,246,0.1);
+      border-color: #A855F7;
+    }
+
+    /* Card hover */
+    .card-hover {
+      transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .card-hover:hover {
+      transform: translateY(-4px);
+      border-color: rgba(139,92,246,0.25);
+      box-shadow: 0 20px 40px rgba(139,92,246,0.15), 0 0 20px rgba(168,85,247,0.1);
+    }
+
+    /* Status badges */
+    .badge-pending {
+      background: rgba(245,158,11,0.15);
+      color: #F59E0B;
+      box-shadow: 0 0 8px rgba(245,158,11,0.2);
+    }
+    .badge-paid {
+      background: rgba(139,92,246,0.15);
+      color: #8B5CF6;
+      box-shadow: 0 0 8px rgba(139,92,246,0.2);
+    }
+    .badge-processing {
+      background: rgba(59,130,246,0.15);
+      color: #3B82F6;
+      box-shadow: 0 0 8px rgba(59,130,246,0.2);
+    }
+    .badge-completed {
+      background: rgba(34,197,94,0.15);
+      color: #22C55E;
+      box-shadow: 0 0 8px rgba(34,197,94,0.2);
+    }
+    .badge-failed {
+      background: rgba(239,68,68,0.15);
+      color: #EF4444;
+      box-shadow: 0 0 8px rgba(239,68,68,0.2);
+    }
+
+    /* Timeline */
+    .timeline-line {
+      position: absolute;
+      left: 19px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 1px;
+    }
+
+    /* Hero entrance */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-fade {
+      animation: fadeInUp 0.8s ease-out both;
+    }
+    .hero-fade-1 { animation-delay: 0.1s; }
+    .hero-fade-2 { animation-delay: 0.25s; }
+    .hero-fade-3 { animation-delay: 0.4s; }
+    .hero-fade-4 { animation-delay: 0.55s; }
+    .hero-fade-5 { animation-delay: 0.7s; }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .hero-fade { animation: none; opacity: 1; }
+      .pulse-subtle { animation: none; }
+    }
+
+    /* ==========================================================
+       DEVICE DROPDOWN — Custom 2-Level Brand/Model Selector
+       ========================================================== */
+    .device-dropdown-wrapper { position: relative; }
+
+    .device-trigger-btn {
+      width: 100%;
+      padding: 14px 48px 14px 18px;
+      background: #1c1929;
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 12px;
+      color: #F5F3FF;
+      font-size: 15px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      outline: none;
+      position: relative;
+    }
+    .device-trigger-btn:focus,
+    .device-trigger-btn.device-open {
+      border-color: #6c3fff;
+      box-shadow: 0 0 0 3px rgba(108,63,255,0.25);
+    }
+    .device-trigger-btn .device-trigger-placeholder {
+      color: rgba(245,243,255,0.4);
+    }
+    .device-trigger-btn .device-arrow {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: #8B5CF6;
+      transition: transform 0.25s ease;
+      pointer-events: none;
+    }
+    .device-trigger-btn.device-open .device-arrow {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    .device-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: #1c1929;
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(139,92,246,0.1);
+      z-index: 50;
+      overflow: hidden;
+      animation: devicePanelIn 0.2s ease both;
+    }
+    @keyframes devicePanelIn {
+      from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .device-panel-inner {
+      padding: 16px;
+      max-height: 380px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(139,92,246,0.3) transparent;
+    }
+    .device-panel-inner::-webkit-scrollbar { width: 5px; }
+    .device-panel-inner::-webkit-scrollbar-thumb {
+      background: rgba(139,92,246,0.3);
+      border-radius: 10px;
+    }
+
+    .device-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .device-panel-header h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #F5F3FF;
+      margin: 0;
+    }
+    .device-panel-header .device-back-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.25);
+      border-radius: 8px;
+      color: #A855F7;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .device-panel-header .device-back-btn:hover {
+      background: rgba(139,92,246,0.2);
+      border-color: #A855F7;
+    }
+
+    .device-brand-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .device-brand-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      color: #F5F3FF;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .device-brand-btn:hover {
+      background: rgba(139,92,246,0.12);
+      border-color: rgba(139,92,246,0.35);
+      transform: translateY(-1px);
+    }
+    .device-brand-btn .brand-icon {
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .device-search {
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: #F5F3FF;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .device-search::placeholder { color: rgba(245,243,255,0.35); }
+    .device-search:focus {
+      border-color: rgba(139,92,246,0.5);
+      box-shadow: 0 0 0 2px rgba(139,92,246,0.1);
+    }
+
+    .device-model-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .device-model-btn {
+      padding: 10px 14px;
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      color: rgba(245,243,255,0.85);
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .device-model-btn:hover {
+      background: rgba(139,92,246,0.12);
+      color: #F5F3FF;
+    }
+    .device-model-btn.selected {
+      background: rgba(139,92,246,0.2);
+      color: #F5F3FF;
+      font-weight: 600;
+    }
+    .device-model-btn.no-match {
+      display: none;
+    }
+
+    .device-other-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: #F5F3FF;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .device-other-input::placeholder { color: rgba(245,243,255,0.35); }
+    .device-other-input:focus {
+      border-color: rgba(139,92,246,0.5);
+      box-shadow: 0 0 0 2px rgba(139,92,246,0.1);
+    }
+    .device-confirm-btn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #7C3AED, #A855F7);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .device-confirm-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .device-step {
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .device-step.hidden {
+      display: none;
+    }
+    .device-step-enter {
+      animation: deviceStepIn 0.2s ease both;
+    }
+    @keyframes deviceStepIn {
+      from { opacity: 0; transform: translateX(12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* OTP Modal: Name fields animation */
+    @keyframes nameFieldsSlide {
+      from { opacity: 0; max-height: 0; transform: translateY(-8px); margin-top: 0; }
+      to   { opacity: 1; max-height: 200px; transform: translateY(0); margin-top: 0; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen antialiased overflow-x-hidden">
+
+  <!-- ===================== NAVBAR ===================== -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 navbar-glass" style="background: rgba(10,10,20,0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.06);">
+    <div class="max-w-6xl mx-auto px-5 md:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <a href="#" class="flex items-center gap-2.5">
+          <img src="https://cdn.jsdelivr.net/gh/deadlyclown/1MEI@main/IMEI.png" alt="TEMBAKIMEI" class="h-9 w-auto rounded-lg" style="filter: drop-shadow(0 0 10px rgba(139,92,246,0.4));">
+        </a>
+
+        <!-- Center Links (desktop) -->
+        <div class="hidden md:flex items-center gap-8 text-[15px] font-medium" style="color: rgba(245,243,255,0.68);">
+          <a href="#cara-kerja" class="hover:text-[#F5F3FF] transition-colors duration-200">Cara Kerja</a>
+          <a href="#cek-status" class="hover:text-[#F5F3FF] transition-colors duration-200">Cek Status</a>
+          <a href="#order" class="hover:text-[#F5F3FF] transition-colors duration-200">Order</a>
+        </div>
+
+        <!-- Auth + CTA (desktop) -->
+        <div class="hidden md:flex items-center gap-4">
+          <div id="auth-nav" class="flex items-center gap-3">
+            <button id="nav-signin" class="text-sm font-medium transition-colors hover:text-white" style="color: rgba(245,243,255,0.68);">Masuk</button>
+          </div>
+          <div id="user-nav" class="hidden items-center gap-3">
+            <button id="nav-profile" class="text-sm font-medium transition-colors hover:text-white" style="color: rgba(245,243,255,0.68);">Profil</button>
+            <span id="user-name" class="text-sm font-medium text-white"></span>
+            <button id="nav-logout" class="text-sm font-medium transition-colors hover:text-white" style="color: rgba(245,243,255,0.68);">Logout</button>
+          </div>
+          <button id="nav-order-btn" class="btn-premium text-white rounded-xl px-5 py-2.5 text-sm font-semibold">
+            Order Sekarang
+          </button>
+        </div>
+
+        <!-- Hamburger (mobile) -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-[#F5F3FF]" aria-label="Toggle menu">
+          <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden" style="background: rgba(10,10,20,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06);">
+      <div class="px-5 py-4 flex flex-col gap-3 text-[15px] font-medium">
+        <a href="#cara-kerja" class="mobile-nav-link py-2 px-3 rounded-lg hover:bg-white/5 transition-colors" style="color: rgba(245,243,255,0.68);">Cara Kerja</a>
+        <a href="#cek-status" class="mobile-nav-link py-2 px-3 rounded-lg hover:bg-white/5 transition-colors" style="color: rgba(245,243,255,0.68);">Cek Status</a>
+        <a href="#order" class="mobile-nav-link py-2 px-3 rounded-lg hover:bg-white/5 transition-colors" style="color: rgba(245,243,255,0.68);">Order</a>
+        <div class="flex flex-col gap-2 mt-1">
+          <button id="mobile-signin" class="mobile-nav-link py-2 px-3 rounded-lg hover:bg-white/5 transition-colors text-center" style="color: rgba(245,243,255,0.68);">Masuk</button>
+          <button id="mobile-profile" class="mobile-nav-link py-2 px-3 rounded-lg hover:bg-white/5 transition-colors text-center hidden" style="color: rgba(245,243,255,0.68);">Profil</button>
+          <button id="mobile-order-btn" class="mobile-nav-link btn-premium text-white rounded-xl px-5 py-2.5 text-sm font-semibold text-center mt-1">Order Sekarang</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO SECTION ===================== -->
+  <section class="relative min-h-screen flex flex-col items-center justify-center pt-24 pb-16 px-5 overflow-hidden">
+    <!-- Ambient Glows -->
+    <div class="ambient-glow hero-arc"></div>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 text-center max-w-4xl mx-auto">
+      <!-- Eyebrow -->
+      <p class="hero-fade hero-fade-1 uppercase tracking-[0.2em] text-xs font-medium text-violet-500 mb-6">
+        IMEI Unlock Service
+      </p>
+
+      <!-- Headline -->
+      <h1 class="hero-fade hero-fade-2 font-sora text-[44px] md:text-[72px] font-extrabold leading-[0.95] tracking-[-0.04em] text-[#F5F3FF]">
+        TEMBAK IMEI<br>3 BULAN
+      </h1>
+
+      <!-- Subheadline -->
+      <p class="hero-fade hero-fade-3 text-lg md:text-xl max-w-2xl mx-auto mt-6 leading-relaxed" style="color: rgba(245,243,255,0.68);">
+        Unlock IMEI resmi untuk semua device. Proses 1x24 jam, payment otomatis, notifikasi real-time via WhatsApp &amp; Telegram.
+      </p>
+
+      <!-- CTA -->
+      <div class="hero-fade hero-fade-4 mt-10">
+        <a href="#order" class="inline-flex btn-premium pulse-subtle text-white rounded-2xl px-8 py-4 text-base font-semibold">
+          Order Sekarang — Rp 150.000
+        </a>
+      </div>
+
+      <!-- Secondary Links -->
+      <div class="hero-fade hero-fade-5 flex items-center justify-center gap-6 mt-6 text-sm" style="color: rgba(245,243,255,0.68);">
+        <a href="https://wa.me/15012108640" target="_blank" class="flex items-center gap-2 hover:text-violet-500 transition-colors duration-200">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+        <a href="https://t.me/meiling0x" target="_blank" class="flex items-center gap-2 hover:text-violet-500 transition-colors duration-200">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          Telegram
+        </a>
+      </div>
+    </div>
+
+    <!-- Dashboard Preview -->
+    <div class="hero-fade hero-fade-5 relative z-10 w-full max-w-3xl mx-auto mt-16 p-1.5 rounded-2xl glass">
+      <div class="rounded-xl overflow-hidden">
+        <img src="images/dashboard-hero.jpg" alt="TEMBAKIMEI Dashboard Preview" class="w-full h-auto block" loading="eager">
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TRUST BAR ===================== -->
+  <section class="relative z-10 px-5 -mt-4">
+    <div class="max-w-3xl mx-auto glass py-4 px-6">
+      <div class="flex flex-wrap items-center justify-center gap-y-3">
+        <!-- Item 1 -->
+        <div class="flex items-center gap-2 px-6 text-sm" style="color: rgba(245,243,255,0.68); border-right: 1px solid rgba(255,255,255,0.08);">
+          <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
+          </svg>
+          <span>Payment Aman</span>
+        </div>
+        <!-- Item 2 -->
+        <div class="flex items-center gap-2 px-6 text-sm" style="color: rgba(245,243,255,0.68); border-right: 1px solid rgba(255,255,255,0.08);">
+          <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
+          </svg>
+          <span>Proses Cepat</span>
+        </div>
+        <!-- Item 3 -->
+        <div class="flex items-center gap-2 px-6 text-sm" style="color: rgba(245,243,255,0.68); border-right: 1px solid rgba(255,255,255,0.08);">
+          <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
+          </svg>
+          <span>Notif Real-time</span>
+        </div>
+        <!-- Item 4 -->
+        <div class="flex items-center gap-2 px-6 text-sm" style="color: rgba(245,243,255,0.68);">
+          <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          </svg>
+          <span>Garansi Aktif</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CARA KERJA SECTION ===================== -->
+  <section id="cara-kerja" class="py-24 md:py-32 px-5">
+    <div class="max-w-6xl mx-auto">
+      <!-- Header -->
+      <div class="text-center">
+        <p class="uppercase tracking-[0.15em] text-xs text-violet-500 font-medium">Cara Kerja</p>
+        <h2 class="font-sora heading-section mt-4">3 Langkah Mudah</h2>
+        <p class="body-text mt-4 max-w-xl mx-auto">Proses yang simpel dan transparan untuk unlock IMEI device kamu.</p>
+      </div>
+
+      <!-- Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+        <!-- Card 1 -->
+        <div class="glass card-hover p-8 text-center">
+          <div class="w-12 h-12 mx-auto mb-6">
+            <img src="images/icon-imei-v2.png" alt="IMEI Icon" class="w-full h-full object-contain" loading="lazy">
+          </div>
+          <p class="font-sora text-3xl font-bold text-violet-500 mb-2">01</p>
+          <h3 class="heading-card">Masukkan IMEI &amp; Device</h3>
+          <p class="body-text mt-3 text-sm">Isi nomor IMEI 15 digit dan pilih model device kamu.</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="glass card-hover p-8 text-center">
+          <div class="w-12 h-12 mx-auto mb-6">
+            <img src="images/icon-payment-v2.png" alt="Payment Icon" class="w-full h-full object-contain" loading="lazy">
+          </div>
+          <p class="font-sora text-3xl font-bold text-violet-500 mb-2">02</p>
+          <h3 class="heading-card">Bayar Otomatis</h3>
+          <p class="body-text mt-3 text-sm">Lakukan pembayaran Rp 150.000 melalui payment gateway yang aman.</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="glass card-hover p-8 text-center">
+          <div class="w-12 h-12 mx-auto mb-6">
+            <img src="images/icon-notif-v2.png" alt="Notification Icon" class="w-full h-full object-contain" loading="lazy">
+          </div>
+          <p class="font-sora text-3xl font-bold text-violet-500 mb-2">03</p>
+          <h3 class="heading-card">IMEI Aktif &amp; Notif</h3>
+          <p class="body-text mt-3 text-sm">IMEI akan aktif dalam 1x24 jam. Kamu akan menerima notifikasi via WhatsApp/Telegram.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ORDER FORM SECTION ===================== -->
+  <section id="order" class="pt-24 md:pt-32 pb-10 md:pb-14 px-5">
+    <div class="max-w-xl mx-auto">
+      <!-- Header -->
+      <div class="text-center">
+        <p class="uppercase tracking-[0.15em] text-xs text-violet-500 font-medium">Order</p>
+        <h2 class="font-sora heading-section mt-4">Form Order IMEI</h2>
+      </div>
+
+      <!-- Form Card -->
+      <div class="glass p-8 md:p-10 mt-10 relative">
+        <!-- Loading Overlay -->
+        <div id="form-loading" class="hidden absolute inset-0 z-20 rounded-[20px] flex flex-col items-center justify-center" style="background: rgba(7,1,15,0.7); backdrop-filter: blur(8px);">
+          <svg class="animate-spin h-8 w-8 text-violet-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <p class="mt-3 text-sm" style="color: rgba(245,243,255,0.68);">Memproses order...</p>
+        </div>
+
+        <!-- GUEST VIEW: Tampilan sebelum login -->
+        <div id="order-guest-view" class="flex flex-col items-center text-center py-8">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center mb-6" style="background: rgba(139,92,246,0.1);">
+            <svg class="w-8 h-8 text-violet-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+            </svg>
+          </div>
+          <h3 class="font-sora text-xl font-semibold text-[#F5F3FF] mb-3">Login Diperlukan</h3>
+          <p class="text-sm max-w-xs mx-auto mb-6" style="color: rgba(245,243,255,0.68);">
+            Silakan masuk atau daftar akun terlebih dahulu untuk melakukan order IMEI.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+            <button id="guest-signin-btn" class="btn-outline w-full py-3 text-sm font-semibold rounded-xl">Sign In</button>
+            <button id="guest-signup-btn" class="btn-premium w-full text-white py-3 text-sm font-semibold rounded-xl">Daftar Akun</button>
+          </div>
+        </div>
+
+        <!-- LOGGED-IN VIEW: Form order (hidden by default, ditampilkan via JS) -->
+        <div id="order-form-view" class="hidden">
+        <form id="order-form" class="flex flex-col gap-5" autocomplete="off">
+          <!-- Nama -->
+          <div>
+            <label for="nama" class="block text-sm font-medium mb-2" style="color: rgba(245,243,255,0.68);">Nama Lengkap</label>
+            <input
+              type="text"
+              id="nama"
+              name="nama"
+              placeholder="Budi Santoso"
+              class="input-field"
+            >
+          </div>
+
+          <!-- IMEI -->
+          <div>
+            <label for="imei" class="block text-sm font-medium mb-2" style="color: rgba(245,243,255,0.68);">Nomor IMEI</label>
+            <div class="relative">
+              <input
+                type="text"
+                id="imei"
+                name="imei"
+                maxlength="15"
+                placeholder="351234567890123"
+                class="input-field font-mono pr-10"
+                inputmode="numeric"
+              >
+              <!-- Validation Icons -->
+              <div id="imei-validation" class="hidden absolute right-3 top-1/2 -translate-y-1/2">
+                <svg id="imei-check" class="w-5 h-5 text-green-400 hidden" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                <svg id="imei-error" class="w-5 h-5 text-red-400 hidden" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </div>
+            </div>
+            <p id="imei-help" class="text-xs mt-1.5 text-slate-500">Masukkan 15 digit nomor IMEI</p>
+          </div>
+
+          <!-- Device — Custom 2-Level Dropdown -->
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color: rgba(245,243,255,0.68);">Model Device</label>
+            <div class="device-dropdown-wrapper">
+              <!-- Trigger Button -->
+              <button type="button" id="device-trigger" class="device-trigger-btn">
+                <span id="device-trigger-text" class="device-trigger-placeholder">Pilih model device</span>
+                <svg class="device-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                </svg>
+              </button>
+              <!-- Hidden input for form submission -->
+              <input type="hidden" id="device" name="device" value="">
+
+              <!-- Dropdown Panel -->
+              <div id="device-panel" class="device-panel hidden">
+                <div class="device-panel-inner">
+
+                  <!-- Step 1: Brand Grid -->
+                  <div id="device-step-brand" class="device-step">
+                    <div class="device-panel-header">
+                      <h4>Pilih Brand</h4>
+                    </div>
+                    <div class="device-brand-grid" id="device-brand-grid">
+                      <button type="button" class="device-brand-btn" data-brand="iphone">
+                        <span class="brand-icon">🍎</span>
+                        <span>iPhone</span>
+                      </button>
+                      <button type="button" class="device-brand-btn" data-brand="samsung">
+                        <span class="brand-icon">📱</span>
+                        <span>Samsung</span>
+                      </button>
+                      <button type="button" class="device-brand-btn" data-brand="xiaomi">
+                        <span class="brand-icon">📱</span>
+                        <span>Xiaomi</span>
+                      </button>
+                      <button type="button" class="device-brand-btn" data-brand="oppo">
+                        <span class="brand-icon">📱</span>
+                        <span>Oppo</span>
+                      </button>
+                      <button type="button" class="device-brand-btn" data-brand="vivo">
+                        <span class="brand-icon">📱</span>
+                        <span>Vivo</span>
+                      </button>
+                      <button type="button" class="device-brand-btn" data-brand="other">
+                        <span class="brand-icon">📝</span>
+                        <span>Lainnya</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Step 2: Model List -->
+                  <div id="device-step-model" class="device-step hidden">
+                    <div class="device-panel-header">
+                      <button type="button" id="device-back-btn" class="device-back-btn">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                        Kembali
+                      </button>
+                      <h4 id="device-brand-title">Brand</h4>
+                    </div>
+                    <input type="text" id="device-search" class="device-search" placeholder="Cari model..." autocomplete="off">
+                    <div id="device-model-list" class="device-model-list">
+                      <!-- Injected via JS -->
+                    </div>
+                    <div id="device-other-wrap" class="hidden" style="margin-top:6px;">
+                      <input type="text" id="device-other-input" class="device-other-input" placeholder="Ketik nama device..." autocomplete="off">
+                      <button type="button" id="device-other-confirm" class="device-confirm-btn">Pilih Device Ini</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- WhatsApp -->
+          <div>
+            <label for="whatsapp" class="block text-sm font-medium mb-2" style="color: rgba(245,243,255,0.68);">Nomor WhatsApp</label>
+            <input
+              type="text"
+              id="whatsapp"
+              name="whatsapp"
+              placeholder="081234567890"
+              class="input-field"
+              inputmode="tel"
+            >
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm font-medium mb-2" style="color: rgba(245,243,255,0.68);">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="nama@email.com"
+              class="input-field"
+              required
+            >
+          </div>
+
+          <!-- Price Box -->
+          <div class="flex justify-between items-center mt-2 p-5 rounded-xl" style="background: rgba(255,255,255,0.03);">
+            <span class="text-sm" style="color: rgba(245,243,255,0.68);">Total Pembayaran</span>
+            <div class="flex items-center gap-2">
+              <span class="text-2xl font-bold text-[#F5F3FF]">Rp 150.000</span>
+              <span class="text-sm line-through" style="color: rgba(245,243,255,0.68);">Rp 300.000</span>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" id="submit-btn" class="btn-premium w-full text-white rounded-2xl py-4 text-base font-semibold flex items-center justify-center gap-2" style="opacity: 0.5; cursor: not-allowed;" disabled>
+            <svg id="btn-spinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span id="btn-text">Lanjutkan Pembayaran</span>
+          </button>
+        </form>
+
+        <!-- Security Note -->
+        <p class="mt-4 text-center text-xs flex items-center justify-center gap-1.5" style="color: rgba(245,243,255,0.68);">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z"/>
+          </svg>
+          Pembayaran aman terenkripsi via Pakasir.com
+        </p>
+
+        <!-- Result Card (hidden by default) -->
+        <div id="order-result" class="hidden mt-6 glass p-6 text-left" style="border-left: 3px solid #22C55E;">
+          <div class="flex items-center gap-2 text-green-400 font-semibold mb-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+            Order berhasil dibuat!
+          </div>
+          <p class="text-sm mb-2" style="color: rgba(245,243,255,0.68);">Order ID: <span id="result-order-id" class="font-mono text-[#F5F3FF] font-semibold">-</span></p>
+          <div class="flex flex-wrap gap-3 mt-4">
+            <a id="payment-link" href="#" target="_blank" class="btn-premium text-white rounded-xl px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-1">
+              Bayar Sekarang
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+              </svg>
+            </a>
+            <button id="copy-order-id" type="button" class="btn-outline px-5 py-2.5 text-sm inline-flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5"/>
+              </svg>
+              Salin Order ID
+            </button>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CEK STATUS SECTION ===================== -->
+  <section id="cek-status" class="pt-10 md:pt-14 pb-24 md:pb-32 px-5">
+    <div class="max-w-xl mx-auto">
+      <!-- Header -->
+      <div class="text-center">
+        <p class="uppercase tracking-[0.15em] text-xs text-violet-500 font-medium">Tracking</p>
+        <h2 class="font-sora heading-section mt-4">Cek Status Order</h2>
+      </div>
+
+      <!-- Status Card -->
+      <div class="glass p-8 mt-10">
+        <!-- Input Row -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            id="status-input"
+            placeholder="Order ID atau Nomor IMEI"
+            class="input-field flex-1"
+          >
+          <button id="check-status-btn" class="btn-outline px-6 whitespace-nowrap flex items-center justify-center gap-2">
+            <svg id="status-btn-spinner" class="animate-spin h-4 w-4 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span id="status-btn-text">Cek Status</span>
+          </button>
+        </div>
+
+        <!-- Result Card — Found (hidden by default) -->
+        <div id="status-result" class="hidden mt-6">
+          <div class="status-result-card" style="background: #1c1929; border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; overflow: hidden; animation: fadeInUp 0.4s ease both;">
+            <!-- Header: Order ID + Status Badge -->
+            <div class="flex items-center justify-between p-5" style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+              <div>
+                <p class="text-[10px] uppercase tracking-wider mb-1" style="color: rgba(245,243,255,0.4);">Order ID</p>
+                <p id="status-order-id" class="font-mono text-sm font-semibold text-[#F5F3FF]">-</p>
+              </div>
+              <span id="status-badge" class="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold badge-pending">PENDING</span>
+            </div>
+
+            <!-- Info Grid -->
+            <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p class="text-[10px] uppercase tracking-wider mb-1" style="color: rgba(245,243,255,0.4);">Device</p>
+                <p id="status-device" class="text-sm font-medium text-[#F5F3FF]">-</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase tracking-wider mb-1" style="color: rgba(245,243,255,0.4);">IMEI</p>
+                <p id="status-imei" class="font-mono text-sm text-[#F5F3FF]">-</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase tracking-wider mb-1" style="color: rgba(245,243,255,0.4);">WhatsApp</p>
+                <p id="status-wa" class="text-sm text-[#F5F3FF]">-</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase tracking-wider mb-1" style="color: rgba(245,243,255,0.4);">Tanggal Order</p>
+                <p id="status-date" class="text-sm text-[#F5F3FF]">-</p>
+              </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="px-5 pb-5">
+              <div class="tl-wrap">
+                <div class="timeline-line"></div>
+
+                <!-- Step 1: Diterima -->
+                <div class="timeline-step tl-item" data-step="diterima">
+                  <div class="timeline-dot" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2);">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/>
+                    </svg>
+                  </div>
+                  <div class="tl-body">
+                    <p class="text-sm font-medium" style="color: #94A3B8;">Diterima</p>
+                    <p class="text-xs" style="color: rgba(245,243,255,0.45);">Order masuk ke sistem</p>
+                  </div>
+                </div>
+
+                <!-- Step 2: Pembayaran -->
+                <div class="timeline-step tl-item" data-step="payment">
+                  <div class="timeline-dot" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2);">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
+                    </svg>
+                  </div>
+                  <div class="tl-body">
+                    <p class="text-sm font-medium" style="color: #94A3B8;">Pembayaran</p>
+                    <p class="text-xs" style="color: rgba(245,243,255,0.45);">Menunggu pembayaran</p>
+                  </div>
+                </div>
+
+                <!-- Step 3: Processing -->
+                <div class="timeline-step tl-item" data-step="processing">
+                  <div class="timeline-dot" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2);">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182"/>
+                    </svg>
+                  </div>
+                  <div class="tl-body">
+                    <p class="text-sm font-medium" style="color: #94A3B8;">Processing</p>
+                    <p class="text-xs" style="color: rgba(245,243,255,0.45);">Sedang diproses</p>
+                  </div>
+                </div>
+
+                <!-- Step 4: Aktif -->
+                <div class="timeline-step tl-item" data-step="aktif">
+                  <div class="timeline-dot" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2);">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    </svg>
+                  </div>
+                  <div class="tl-body">
+                    <p class="text-sm font-medium" style="color: #94A3B8;">Aktif</p>
+                    <p class="text-xs" style="color: rgba(245,243,255,0.45);">IMEI berhasil di-unlock</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Success Message -->
+            <div id="status-success" class="hidden mx-5 mb-5 p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+              <p class="text-sm text-green-400 font-medium flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                IMEI berhasil di-unlock! Device kamu sudah aktif.
+              </p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="status-error" class="hidden mx-5 mb-5 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+              <p class="text-sm text-red-400 font-medium flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0zm-9 3.75h.008v.008H12v-.008z"/>
+                </svg>
+                <span id="status-error-text">Order dibatalkan atau gagal diproses.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Not Found Card (hidden by default) -->
+        <div id="status-notfound" class="hidden mt-6">
+          <div style="background: #1c1929; border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; padding: 28px; text-align: center; animation: fadeInUp 0.4s ease both;">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(239,68,68,0.1);">
+              <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0zm-9 3.75h.008v.008H12v-.008z"/>
+              </svg>
+            </div>
+            <p class="text-sm text-red-400 font-semibold mb-1">Order tidak ditemukan</p>
+            <p class="text-xs" style="color: rgba(245,243,255,0.5);">Pastikan Order ID atau nomor IMEI yang dimasukkan sudah benar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== AUTH MODAL (OTP) ===================== -->
+  <div id="auth-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4" style="background: rgba(7,1,15,0.85); backdrop-filter: blur(8px);">
+    <div class="glass-strong w-full max-w-md p-8 md:p-10 rounded-2xl relative">
+      <button id="auth-close" class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h3 class="font-sora text-xl font-semibold text-[#F5F3FF]">Masuk dengan OTP</h3>
+        <p class="text-xs mt-2" style="color: rgba(245,243,255,0.5);">Kode verifikasi akan dikirim ke email Anda</p>
+      </div>
+
+      <!-- Step 1: Email + Name (register flow) -->
+      <div id="otp-step-1" class="flex flex-col gap-4">
+        <!-- Email Input + Indicator -->
+        <div>
+          <label class="block text-xs font-medium mb-1.5 text-white/60">Alamat Email</label>
+          <input type="email" id="otp-email" class="input-field" placeholder="nama@email.com" required autocomplete="off">
+        </div>
+
+        <!-- Name Fields (hidden by default, shown when email is new) -->
+        <div id="otp-name-fields" class="hidden" style="animation: nameFieldsSlide 0.3s ease both;">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium mb-1.5 text-white/60">Nama Depan</label>
+              <input type="text" id="otp-first-name" class="input-field" placeholder="Budi" style="background: #1c1929; border-color: rgba(139,92,246,0.3);" autocomplete="off">
+              <p id="otp-first-name-error" class="hidden text-xs mt-1.5" style="color: #ef4444;"></p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium mb-1.5 text-white/60">Nama Belakang</label>
+              <input type="text" id="otp-last-name" class="input-field" placeholder="Santoso" style="background: #1c1929; border-color: rgba(139,92,246,0.3);" autocomplete="off">
+              <p id="otp-last-name-error" class="hidden text-xs mt-1.5" style="color: #ef4444;"></p>
+            </div>
+          </div>
+        </div>
+
+        <p id="otp-error" class="text-xs text-red-400 hidden"></p>
+        <button id="otp-send-btn" class="btn-premium w-full text-white rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2">
+          <svg id="otp-send-spinner" class="animate-spin h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <span id="otp-send-text">Kirim Kode OTP</span>
+        </button>
+      </div>
+
+      <!-- Step 2: OTP Code -->
+      <div id="otp-step-2" class="hidden flex flex-col gap-4">
+        <div class="text-center">
+          <p class="text-sm mb-1" style="color: rgba(245,243,255,0.68);">Kode OTP telah dikirim ke</p>
+          <p id="otp-display-email" class="text-sm font-semibold text-violet-400"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1.5 text-white/60">Kode OTP (6 digit)</label>
+          <input type="text" id="otp-code" class="input-field text-center font-mono text-lg tracking-[0.3em]" placeholder="000000" maxlength="6" inputmode="numeric">
+        </div>
+        <p id="otp-verify-error" class="text-xs text-red-400 hidden"></p>
+        <button id="otp-verify-btn" class="btn-premium w-full text-white rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2">
+          <svg id="otp-verify-spinner" class="animate-spin h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <span id="otp-verify-text">Verifikasi</span>
+        </button>
+        <button id="otp-back-btn" class="text-xs font-medium transition-colors hover:text-white" style="color: rgba(245,243,255,0.5);">
+          ← Kembali, ganti email
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PROFILE SETTINGS MODAL ===================== -->
+  <div id="profile-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4" style="background: rgba(7,1,15,0.85); backdrop-filter: blur(8px);">
+    <div class="glass-strong w-full max-w-md p-8 md:p-10 rounded-2xl relative">
+      <button id="profile-close" class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(139,92,246,0.1);">
+          <svg class="w-6 h-6 text-violet-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+          </svg>
+        </div>
+        <h3 class="font-sora text-xl font-semibold text-[#F5F3FF]">Pengaturan Profil</h3>
+        <p class="text-xs mt-2" style="color: rgba(245,243,255,0.5);">Kelola data akun Anda</p>
+      </div>
+
+      <!-- Profile Form -->
+      <form id="profile-form" class="flex flex-col gap-4">
+        <div>
+          <label class="block text-xs font-medium mb-1.5 text-white/60">Nama Lengkap</label>
+          <input type="text" id="profile-nama" class="input-field" placeholder="Budi Santoso" required>
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1.5 text-white/60">Email</label>
+          <input type="email" id="profile-email" class="input-field" placeholder="nama@email.com" readonly style="opacity: 0.5; cursor: not-allowed;">
+          <p class="text-[10px] mt-1" style="color: rgba(245,243,255,0.35);">Email tidak dapat diubah</p>
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1.5 text-white/60">Nomor WhatsApp</label>
+          <input type="text" id="profile-wa" class="input-field" placeholder="081234567890" required>
+        </div>
+        <p id="profile-error" class="text-xs text-red-400 hidden"></p>
+        <button type="submit" id="profile-save-btn" class="btn-premium w-full text-white rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 mt-2">
+          <svg id="profile-spinner" class="animate-spin h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <span id="profile-save-text">Simpan Perubahan</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer-glass py-8 px-5">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-sm" style="color: rgba(245,243,255,0.68);">&copy; 2026 Aktifin IMEI</p>
+      <div class="flex items-center gap-4 text-sm" style="color: rgba(245,243,255,0.68);">
+        <a href="https://wa.me/15012108640" target="_blank" class="hover:text-violet-500 transition-colors duration-200">WhatsApp</a>
+        <a href="https://t.me/meiling0x" target="_blank" class="hover:text-violet-500 transition-colors duration-200">Telegram</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== PAYMENT MODAL ===================== -->
+  <div id="payment-modal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);">
+    <div class="w-full max-w-md rounded-2xl overflow-hidden relative" style="background: #15131f; border: 1px solid rgba(139,92,246,0.3);">
+      <!-- Header -->
+      <div class="p-6 text-center relative" style="background: linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(168,85,247,0.1) 100%); border-bottom: 1px solid rgba(139,92,246,0.2);">
+        <button id="payment-modal-close" class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <div class="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3" style="background: rgba(139,92,246,0.15);">
+          <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
+          </svg>
+        </div>
+        <h3 class="font-sora text-lg font-semibold text-[#F5F3FF]">Pembayaran QRIS</h3>
+        <p class="text-xs mt-1" style="color: rgba(245,243,255,0.5);">Scan kode QR dengan aplikasi e-wallet atau mobile banking</p>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 flex flex-col items-center gap-5">
+        <!-- QR Code Container -->
+        <div id="payment-qr-container" class="p-4 rounded-xl bg-white flex items-center justify-center" style="width: 220px; height: 220px;">
+          <div class="animate-pulse w-16 h-16 rounded-full" style="background: rgba(139,92,246,0.2);"></div>
+        </div>
+
+        <!-- Order ID -->
+        <div class="text-center">
+          <p class="text-[10px] uppercase tracking-wider" style="color: rgba(245,243,255,0.4);">Order ID</p>
+          <p id="payment-modal-order-id" class="font-mono text-sm font-semibold text-[#F5F3FF] mt-0.5">-</p>
+        </div>
+
+        <!-- Amount Box -->
+        <div class="w-full p-4 rounded-xl text-center" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+          <p class="text-[10px] uppercase tracking-wider mb-1" style="color: rgba(245,243,255,0.4);">Total Pembayaran</p>
+          <p id="payment-modal-total" class="text-2xl font-bold text-[#F5F3FF]">Rp 0</p>
+          <p id="payment-modal-fee" class="text-[11px] mt-1" style="color: rgba(245,243,255,0.35);">Termasuk biaya layanan</p>
+        </div>
+
+        <!-- Countdown -->
+        <div class="flex items-center gap-2 px-4 py-2 rounded-full" style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2);">
+          <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          </svg>
+          <span class="text-xs text-amber-400">Berlaku s/d</span>
+          <span id="payment-timer" class="text-sm font-mono font-semibold text-amber-400">--:--</span>
+        </div>
+
+        <!-- Polling Status -->
+        <div class="flex items-center gap-2">
+          <span id="payment-polling-dot" class="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></span>
+          <p id="payment-polling-status" class="text-xs" style="color: rgba(245,243,255,0.5);">Menunggu pembayaran...</p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-4 flex gap-3" style="border-top: 1px solid rgba(255,255,255,0.06);">
+        <button id="payment-check-btn" class="btn-premium flex-1 text-white rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          </svg>
+          Sudah Bayar
+        </button>
+        <button id="payment-cancel-btn" class="btn-outline px-5 rounded-xl text-sm font-medium">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SCRIPTS ===================== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src=".env.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/pakasir.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
