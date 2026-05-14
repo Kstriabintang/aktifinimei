@@ -34,6 +34,9 @@
     }
   </script>
 
+  <!-- Environment config: loaded first so window.ENV is available to all scripts -->
+  <script src=".env.js?v=1"></script>
+
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
@@ -1278,7 +1281,6 @@
 
   <!-- ===================== SCRIPTS ===================== -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src=".env.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/pakasir.js"></script>
   <script src="js/main.js"></script>
